@@ -40,6 +40,9 @@ const (
 	Ping     Type = 13
 	Pong     Type = 14
 	Bye      Type = 15
+	// SaveReq bittet den Master zu speichern (ein Teilnehmer, der kein Master ist), SaveFail ist seine Absage.
+	SaveReq  Type = 16
+	SaveFail Type = 17
 	BlobPart Type = 20
 	BlobReq  Type = 21
 	BlobDone Type = 22
@@ -48,6 +51,7 @@ const (
 var typeNames = map[Type]string{
 	Hello: "HELLO", Welcome: "WELCOME", Roster: "ROSTER", SyncReq: "SYNC_REQ", Sync: "SYNC", Op: "OP", Commit: "COMMIT",
 	Nak: "NAK", Presence: "PRESENCE", Mode: "MODE", Master: "MASTER", Saved: "SAVED", Ping: "PING", Pong: "PONG", Bye: "BYE",
+	SaveReq: "SAVE_REQ", SaveFail: "SAVE_FAIL",
 	BlobPart: "BLOB_PART", BlobReq: "BLOB_REQ", BlobDone: "BLOB_DONE",
 }
 

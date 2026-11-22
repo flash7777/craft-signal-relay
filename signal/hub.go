@@ -681,9 +681,9 @@ func (h *Hub) handleControlFrame(s *Session, p *Participant, f *frame.Frame) {
 	case frame.Ping:
 		p.control.sendFrame(&frame.Frame{Type: frame.Pong, Session: s.ID, Seq: s.Seq}, true)
 	case frame.Pong:
-	case frame.Op, frame.SyncReq:
-		// Nur zum Master; ein Leser hat nichts vorzuschlagen, der Master schlägt sich nichts vor.
-		if f.Type == frame.Op && p.Mode != ModeEdit {
+	case frame.Op, frame.SyncReq, frame.SaveReq:
+		// Nur zum Master; ein Leser hat nichts vorzuschlagen und nichts zu speichern, der Master schlägt sich nichts vor.
+		if (f.Type == frame.Op || f.Type == frame.SaveReq) && p.Mode != ModeEdit {
 			return
 		}
 		if s.master == nil || s.master == p {
@@ -691,8 +691,8 @@ func (h *Hub) handleControlFrame(s *Session, p *Participant, f *frame.Frame) {
 		}
 		f.Sender = p.ID
 		s.master.control.sendFrame(f, false)
-		if f.Type == frame.Op {
-			// Beobachter sind zum Debuggen da: sie bekommen auch die Vorschläge, nicht nur was bestätigt wird.
+		if f.Type == frame.Op || f.Type == frame.SaveReq {
+			// Beobachter sind zum Debuggen da: sie bekommen auch die Vorschläge und Speicherbitten.
 			toObserversLocked(s, f, false)
 		}
 	case frame.Commit, frame.Saved:
@@ -713,7 +713,7 @@ func (h *Hub) handleControlFrame(s *Session, p *Participant, f *frame.Frame) {
 			}
 		}
 		toObserversLocked(s, f, false)
-	case frame.Nak, frame.Sync:
+	case frame.Nak, frame.Sync, frame.SaveFail:
 		// Vom Master an einen Adressaten: `sender` nennt ihn (Kopf hat kein Zielfeld).
 		if s.master != p {
 			return
@@ -724,8 +724,8 @@ func (h *Hub) handleControlFrame(s *Session, p *Participant, f *frame.Frame) {
 			// Der Stand, den ein Beobachter angefordert hat.
 			observer.control.sendFrame(f, false)
 		}
-		if f.Type == frame.Nak {
-			// Auch die Ablehnungen (wie die Vorschläge): `sender` nennt, wessen Vorschlag abgelehnt wurde.
+		if f.Type == frame.Nak || f.Type == frame.SaveFail {
+			// Auch die Ablehnungen (wie die Vorschläge): `sender` nennt, wessen Vorschlag oder Bitte abgelehnt wurde.
 			toObserversLocked(s, f, false)
 		}
 	case frame.Presence:

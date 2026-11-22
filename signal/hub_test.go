@@ -377,3 +377,34 @@ func TestTicketsAreSingleUseAndNeedAuthorization(t *testing.T) {
 		t.Fatal("HELLO must come first")
 	}
 }
+
+func TestASaveRequestGoesToTheMasterAndItsRefusalBackToTheOneWhoAsked(t *testing.T) {
+	_, server := newServer(t)
+	a := join(t, server, "anna", "doc-save", "wordcraft", "1", ModeEdit)
+	b := join(t, server, "ben", "doc-save", "wordcraft", "1", ModeEdit)
+	c := join(t, server, "cem", "doc-save", "wordcraft", "1", ModeReadOnly)
+	send(t, b.control, &frame.Frame{Type: frame.SaveReq, Local: 3})
+	request := recvType(t, a.frames, frame.SaveReq)
+	if request.Sender != b.id || request.Local != 3 {
+		t.Fatalf("save request at the master: %+v", request)
+	}
+	nothing(t, c.frames, frame.SaveReq, 150*time.Millisecond)
+	// A reader has nothing to save.
+	send(t, c.control, &frame.Frame{Type: frame.SaveReq, Local: 1})
+	nothing(t, a.frames, frame.SaveReq, 150*time.Millisecond)
+	// The refusal goes to the one who asked only.
+	send(t, a.control, &frame.Frame{Type: frame.SaveFail, Sender: b.id, Local: 3, Payload: []byte("incomplete")})
+	if refusal := recvType(t, b.frames, frame.SaveFail); refusal.Local != 3 || string(refusal.Payload) != "incomplete" {
+		t.Fatalf("refusal: %+v", refusal)
+	}
+	nothing(t, c.frames, frame.SaveFail, 150*time.Millisecond)
+	// A refusal from someone else than the master goes nowhere; SAVED from the master to everyone else.
+	send(t, b.control, &frame.Frame{Type: frame.SaveFail, Sender: c.id, Local: 9})
+	nothing(t, c.frames, frame.SaveFail, 150*time.Millisecond)
+	send(t, a.control, &frame.Frame{Type: frame.Saved, Seq: 4, Payload: []byte("etag")})
+	for _, m := range []*client{b, c} {
+		if saved := recvType(t, m.frames, frame.Saved); saved.Seq != 4 || string(saved.Payload) != "etag" {
+			t.Fatalf("saved: %+v", saved)
+		}
+	}
+}
