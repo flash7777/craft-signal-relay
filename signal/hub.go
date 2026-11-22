@@ -14,7 +14,7 @@ import (
 
 	"github.com/coder/websocket"
 
-	"forge.mux.nu/xworx/craft-signal-relay/frame"
+	"github.com/flash7777/craft-signal-relay/frame"
 )
 
 // TicketTTL ist, wie lange ein Ticket auf seinen HELLO wartet.

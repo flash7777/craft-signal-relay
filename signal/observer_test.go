@@ -10,7 +10,7 @@ import (
 
 	"github.com/coder/websocket"
 
-	"forge.mux.nu/xworx/craft-signal-relay/frame"
+	"github.com/flash7777/craft-signal-relay/frame"
 )
 
 // hiddenServer ist ein Relais, auf dem nur recorder verdeckt beitreten darf und root die Betriebsrolle hat.

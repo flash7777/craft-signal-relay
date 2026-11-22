@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.mux.nu/xworx/craft-signal-relay/signal"
+	"github.com/flash7777/craft-signal-relay/signal"
 )
 
 func main() {

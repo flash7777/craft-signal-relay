@@ -12,7 +12,7 @@ import (
 
 	"github.com/coder/websocket"
 
-	"forge.mux.nu/xworx/craft-signal-relay/frame"
+	"github.com/flash7777/craft-signal-relay/frame"
 )
 
 // client ist ein Testteilnehmer: Ticket, Steuerkanal, auf Wunsch Bulk-Kanal.

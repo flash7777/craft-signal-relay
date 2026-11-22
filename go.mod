@@ -1,4 +1,4 @@
-module forge.mux.nu/xworx/craft-signal-relay
+module github.com/flash7777/craft-signal-relay
 
 go 1.25.0
 
